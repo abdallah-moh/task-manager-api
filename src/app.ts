@@ -1,7 +1,10 @@
-import express from 'express';
+import express, { json } from 'express';
+import { usersRoute } from './routes/index.js';
 
 const app = express();
-app.get("/", (req, res) => {
-    res.send("HI");
-});
+
+app.use(json());
+
+app.use("/api/v1/users", usersRoute);
+
 export default app;
