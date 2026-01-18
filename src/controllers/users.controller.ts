@@ -1,6 +1,7 @@
 import type { Request, Response } from "express";
 import Joi from "joi";
 import jwt from "jsonwebtoken";
+import bcrypt from "bcrypt";
 import { createNewUser, getUser, promoteAUser } from "../services/users.service.js";
 
 
@@ -35,14 +36,27 @@ function loginController(req: Request, res: Response) {
         return;
     }
 
-    let accessToken = jwt.sign({
-        id: user?.id,
-        email: user?.email,
-        name: user?.name
-    }, AUTHORIZATION_TOKEN_SECRET);
+    bcrypt.compare(value.password, user.password).then((isMatch) => {
+        if (!isMatch) {
+            res.status(400).json({
+                message: "The password is incorrect"
+            });
+            return;
+        }
+        let accessToken = jwt.sign({
+            id: user?.id,
+            email: user?.email,
+            name: user?.name
+        }, AUTHORIZATION_TOKEN_SECRET);
 
-    res.json({
-        accessToken
+        res.json({
+            accessToken
+        });
+    }).catch(() => {
+        res.status(500).json({
+            message: "An error occurred while processing your request"
+        });
+        return;
     });
 }
 
@@ -59,15 +73,16 @@ async function registerController(req: Request, res: Response) {
     let user = await createNewUser(value.email, value.password, value.name);
 
     if (!user) {
-        res.status(400).json({
+        res.status(409).json({
             message: "A user with this email already exists"
         });
         return;
     }
+
     let accessToken = jwt.sign({
-        id: user?.id,
-        email: user?.email,
-        name: user?.name
+        id: user.id,
+        email: user.email,
+        name: user.name
     }, AUTHORIZATION_TOKEN_SECRET);
 
     res.json({
@@ -76,13 +91,6 @@ async function registerController(req: Request, res: Response) {
 }
 
 function promoteController(req: Request<{ id: string; }>, res: Response) {
-    // const admin = getUser('id', req.body.id);
-    // const user = getUser('id', req.params.id);
-    // if (!user) {
-    //     res.status(404).json({
-    //         message: "A user with this ID doesn't exist"
-    //     });
-    // }
     try {
         promoteAUser("id", req.params.id);
         res.sendStatus(200);

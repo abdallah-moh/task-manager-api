@@ -5,10 +5,17 @@ import { UserRole } from "../types/users.js";
 function adminAuthMiddleware(req: Request, res: Response, next: NextFunction) {
     let user = getUser('id', req.body.id);
 
-    let isAdmin = user?.role === UserRole.ADMIN;
+    if (!user) {
+        res.status(403).json({
+            message: "User not found"
+        });
+        return;
+    }
+
+    let isAdmin = user.role === UserRole.ADMIN;
 
     if (!isAdmin) {
-        res.status(400).json({
+        res.status(403).json({
             message: "This feature is only allowed for admins"
         });
         return;

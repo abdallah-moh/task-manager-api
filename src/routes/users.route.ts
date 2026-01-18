@@ -6,7 +6,7 @@ import { getAllUsers } from "../services/users.service.js";
 
 const router = Router();
 
-router.get("/login", loginController);
+router.post("/login", loginController);
 
 router.post("/register", registerController);
 

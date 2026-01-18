@@ -41,8 +41,9 @@ function promoteAUser(key: 'id' | 'email', value: string) {
         throw new Error("A user with this ID doesn't exist");
     }
     let index = users.indexOf(user);
-    // @ts-ignore
-    users[index].role = UserRole.ADMIN;
+    if (index !== -1) {
+        users[index] = { ...users[index], role: UserRole.ADMIN } as User;
+    }
 }
 
 export { checkUserExists, createNewUser, getUser, getAllUsers, promoteAUser };

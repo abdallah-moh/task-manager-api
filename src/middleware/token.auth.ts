@@ -12,7 +12,7 @@ function tokenAuthMiddleware(req: Request, res: Response, next: NextFunction) {
     }
 
     if (!accessToken) {
-        res.status(400).json({ message: "An access token should be provided in the header" });
+        res.status(401).json({ message: "An access token should be provided in the header" });
         return;
     }
 
@@ -24,7 +24,7 @@ function tokenAuthMiddleware(req: Request, res: Response, next: NextFunction) {
         req.body = payload;
         if (!checkUserExists('id', req.body.id)) {
             res.status(404).json({
-                message: "A user with these login creditentals doesn't exist"
+                message: "A user with these login credentials doesn't exist"
             });
             return;
         }
