@@ -18,11 +18,11 @@ const registerSchema = Joi.object({
     name: Joi.string().required().min(3).max(30),
 }).unknown(true);
 
-function loginController(req: Request, res: Response) {
+async function loginController(req: Request, res: Response) {
     const { value, error } = loginSchema.validate(req.body);
 
     if (error) {
-        res.status(400).json({
+        res.status(401).json({
             message: error.message
         });
         return;
@@ -30,34 +30,35 @@ function loginController(req: Request, res: Response) {
 
     let user = getUser('email', value.email);
     if (!user) {
-        res.status(400).json({
+        res.status(401).json({
             message: "A user with this email does not exist"
         });
         return;
     }
 
-    bcrypt.compare(value.password, user.password).then((isMatch) => {
+    try {
+        const isMatch = await bcrypt.compare(value.password, user.password);
         if (!isMatch) {
-            res.status(400).json({
+            res.status(401).json({
                 message: "The password is incorrect"
             });
             return;
         }
+
         let accessToken = jwt.sign({
-            id: user?.id,
-            email: user?.email,
-            name: user?.name
+            id: user.id,
+            email: user.email,
+            name: user.name
         }, AUTHORIZATION_TOKEN_SECRET);
 
         res.json({
             accessToken
         });
-    }).catch(() => {
+    } catch (err) {
         res.status(500).json({
             message: "An error occurred while processing your request"
         });
-        return;
-    });
+    }
 }
 
 async function registerController(req: Request, res: Response) {
