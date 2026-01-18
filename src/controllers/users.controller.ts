@@ -1,10 +1,11 @@
 import type { Request, Response } from "express";
 import Joi from "joi";
 import jwt from "jsonwebtoken";
-import { checkUserExists, createNewUser, getUser } from "../services/users.service.js";
+import { createNewUser, getUser } from "../services/users.service.js";
 
 
 const AUTHORIZATION_TOKEN_SECRET = process.env.AUTHORIZATION_TOKEN_SECRET || "secret";
+
 const loginSchema = Joi.object({
     email: Joi.string().required().email(),
     password: Joi.string().required().pattern(new RegExp('^[a-zA-Z0-9]{3,30}$'))
