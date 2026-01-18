@@ -1,7 +1,7 @@
 import type { Request, Response } from "express";
 import Joi from "joi";
 import jwt from "jsonwebtoken";
-import { createNewUser, getUser } from "../services/users.service.js";
+import { createNewUser, getUser, promoteAUser } from "../services/users.service.js";
 
 
 const AUTHORIZATION_TOKEN_SECRET = process.env.AUTHORIZATION_TOKEN_SECRET || "secret";
@@ -17,7 +17,7 @@ const registerSchema = Joi.object({
     name: Joi.string().required().min(3).max(30),
 }).unknown(true);
 
-function loginToUser(req: Request, res: Response) {
+function loginController(req: Request, res: Response) {
     const { value, error } = loginSchema.validate(req.body);
 
     if (error) {
@@ -27,7 +27,7 @@ function loginToUser(req: Request, res: Response) {
         return;
     }
 
-    let user = getUser(value.email);
+    let user = getUser('email', value.email);
     if (!user) {
         res.status(400).json({
             message: "A user with this email does not exist"
@@ -46,7 +46,7 @@ function loginToUser(req: Request, res: Response) {
     });
 }
 
-async function registerAUser(req: Request, res: Response) {
+async function registerController(req: Request, res: Response) {
     const { value, error } = registerSchema.validate(req.body);
 
     if (error) {
@@ -75,6 +75,30 @@ async function registerAUser(req: Request, res: Response) {
     });
 }
 
+function promoteController(req: Request<{ id: string; }>, res: Response) {
+    // const admin = getUser('id', req.body.id);
+    // const user = getUser('id', req.params.id);
+    // if (!user) {
+    //     res.status(404).json({
+    //         message: "A user with this ID doesn't exist"
+    //     });
+    // }
+    try {
+        promoteAUser("id", req.params.id);
+        res.sendStatus(200);
+    }
+    catch (err) {
+        let error = err as Error;
+        res.status(404).json({
+            message: error.message
+        });
+    }
+
+
+}
+
 export {
-    loginToUser, registerAUser
+    loginController,
+    registerController,
+    promoteController
 };

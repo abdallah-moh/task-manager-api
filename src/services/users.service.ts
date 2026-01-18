@@ -3,21 +3,22 @@ import bcrypt from "bcrypt";
 
 let users: User[] = [];
 
-function checkUserExists(email: string) {
-    return getUser(email) != null;
+function checkUserExists(key: 'id' | 'email', value: string) {
+    return getUser(key, value) != null;
 }
 
-function getUser(email: string) {
+function getUser(key: 'id' | 'email', value: string) {
     return users.find((user) => {
-        return user.email === email;
+        return user[key] === value;
     });
 }
+
 function getAllUsers() {
     return users;
 }
 
 async function createNewUser(email: string, password: string, name: string) {
-    if (checkUserExists(email)) {
+    if (checkUserExists('email', email)) {
         return null;
     }
 
@@ -34,4 +35,14 @@ async function createNewUser(email: string, password: string, name: string) {
     return user;
 }
 
-export { checkUserExists, createNewUser, getUser, getAllUsers };
+function promoteAUser(key: 'id' | 'email', value: string) {
+    let user = getUser(key, value);
+    if (!user) {
+        throw new Error("A user with this ID doesn't exist");
+    }
+    let index = users.indexOf(user);
+    // @ts-ignore
+    users[index].role = UserRole.ADMIN;
+}
+
+export { checkUserExists, createNewUser, getUser, getAllUsers, promoteAUser };

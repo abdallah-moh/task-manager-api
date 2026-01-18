@@ -1,8 +1,9 @@
 import jwt from "jsonwebtoken";
 import type { Request, Response, NextFunction } from "express";
+import { checkUserExists } from "../services/users.service.js";
 const AUTHORIZATION_TOKEN_SECRET = process.env.AUTHORIZATION_TOKEN_SECRET || "secret";
 
-function userAuthMiddleware(req: Request, res: Response, next: NextFunction) {
+function tokenAuthMiddleware(req: Request, res: Response, next: NextFunction) {
     let { authorization } = req.headers;
     let accessToken;
 
@@ -20,8 +21,15 @@ function userAuthMiddleware(req: Request, res: Response, next: NextFunction) {
             res.sendStatus(403);
             return;
         }
+        req.body = payload;
+        if (!checkUserExists('id', req.body.id)) {
+            res.status(404).json({
+                message: "A user with these login creditentals doesn't exist"
+            });
+            return;
+        }
         next();
     });
 };
 
-export { userAuthMiddleware };
+export { tokenAuthMiddleware };

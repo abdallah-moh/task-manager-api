@@ -1,6 +1,6 @@
 enum UserRole {
-    USER,
-    ADMIN
+    USER = "USER",
+    ADMIN = "ADMIN"
 }
 
 interface User {
