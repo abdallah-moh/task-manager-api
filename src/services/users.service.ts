@@ -1,5 +1,9 @@
-import { UserRole, type User } from "../types/users.js";
+import { UserRole, type User } from "../types/users.types.js";
 import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
+import { ApiError } from "../utils/api-error.js";
+
+const AUTHORIZATION_TOKEN_SECRET = process.env.AUTHORIZATION_TOKEN_SECRET || "secret";
 
 let users: User[] = [];
 
@@ -35,15 +39,61 @@ async function createNewUser(email: string, password: string, name: string) {
     return user;
 }
 
+
+async function loginUser(email: string, password: string) {
+    let user = getUser("email", email);
+
+    if (!user) {
+        throw new ApiError(400, "Invalid email or password");
+    }
+
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+        throw new ApiError(400, "Invalid email or password");
+    }
+
+    let token = jwt.sign(
+        {
+            id: user.id,
+            email: user.email,
+            name: user.name
+        },
+        AUTHORIZATION_TOKEN_SECRET,
+        {
+            expiresIn: "1h",
+        }
+    );
+
+    return { token };
+}
+
+async function registerUser(email: string, password: string, name: string) {
+    let user = await createNewUser(email, password, name);
+
+    if (!user) {
+        throw new ApiError(409, "Email already used");
+    }
+
+    let token = jwt.sign({
+        id: user.id,
+        email: user.email,
+        name: user.name
+    }, AUTHORIZATION_TOKEN_SECRET);
+
+    return { token };
+}
+
 function promoteAUser(key: 'id' | 'email', value: string) {
     let user = getUser(key, value);
+
     if (!user) {
-        throw new Error("A user with this ID doesn't exist");
+        throw new ApiError(404, "A user with this ID doesn't exist");
     }
+
     let index = users.indexOf(user);
     if (index !== -1) {
         users[index] = { ...users[index], role: UserRole.ADMIN } as User;
     }
 }
 
-export { checkUserExists, createNewUser, getUser, getAllUsers, promoteAUser };
+export { checkUserExists, createNewUser, getUser, getAllUsers, promoteAUser, loginUser, registerUser };
