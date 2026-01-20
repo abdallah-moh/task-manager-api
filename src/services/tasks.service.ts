@@ -69,7 +69,7 @@ export function deleteTask(options: {
     role: UserRole;
 }) {
     let index = tasks.findIndex((t) => {
-        t.id === options.id;
+        return t.id === options.id;
     });
 
     if (index < 0)
