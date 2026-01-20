@@ -55,8 +55,7 @@ async function loginUser(email: string, password: string) {
     let token = jwt.sign(
         {
             id: user.id,
-            email: user.email,
-            name: user.name
+            role: user.role
         },
         AUTHORIZATION_TOKEN_SECRET,
         {
@@ -74,12 +73,16 @@ async function registerUser(email: string, password: string, name: string) {
         throw new ApiError(409, "Email already used");
     }
 
-    let token = jwt.sign({
-        id: user.id,
-        email: user.email,
-        name: user.name
-    }, AUTHORIZATION_TOKEN_SECRET);
-
+    let token = jwt.sign(
+        {
+            id: user.id,
+            role: user.role
+        },
+        AUTHORIZATION_TOKEN_SECRET,
+        {
+            expiresIn: "1h",
+        }
+    );
     return { token };
 }
 

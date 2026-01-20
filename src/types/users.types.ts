@@ -1,9 +1,9 @@
-enum UserRole {
+export enum UserRole {
     USER = "USER",
     ADMIN = "ADMIN"
 }
 
-interface User {
+export interface User {
     id: string,
     name: string,
     email: string,
@@ -11,5 +11,3 @@ interface User {
     role: UserRole,
     createdAt: Date;
 }
-
-export { type User, UserRole };
