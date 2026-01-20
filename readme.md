@@ -111,8 +111,8 @@ This pattern keeps the codebase clean and scalable.
 | GET    | `/tasks`              | Get tasks for current user               | User          |
 | POST   | `/tasks`              | Create task                              | User          |
 | PATCH  | `/tasks/:id`          | Edit task                                | Owner / Admin |
-| GET    | `/tasks/user/:userId` | Admin: get all tasks for a specific user | Admin         |
-| GET    | `/tasks/:id`          | Get task by ID                           | Admin         |
+| GET    | `/tasks/:id`          | Admin: get all tasks for a specific user | Admin         |
+| GET    | `/tasks?id=`          | Get task by ID                           | Admin         |
 | POST   | `/tasks/:id`          | Create task for user                     | Admin         |
 
 > All routes require authentication
@@ -125,7 +125,7 @@ This pattern keeps the codebase clean and scalable.
 * **Express.js**
 * **TypeScript**
 * **JWT** for authentication
-* **Zod / Joi** (or similar) for validation
+* **Joi** for validation
 
 ---
 
@@ -190,3 +190,4 @@ Focused on Backend Engineering & Software Architecture
 ## 📄 License
 
 MIT License
+
