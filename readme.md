@@ -12,7 +12,7 @@ This project is designed to demonstrate **backend engineering best practices**, 
 * Role-based authorization (User / Admin)
 * Task management with ownership rules
 * Admin-only privileged actions
-* Admin route to fetch all tasks for a specific user: `GET /tasks/user/:userId`
+* Admin route to fetch all tasks for a specific user: `GET /tasks/user/:id`
 * Centralized error handling middleware
 * Request validation layer
 * Clean separation of concerns (Routes → Controllers → Services)
@@ -71,7 +71,7 @@ src/
 
 * **Users** can access and modify their own tasks
 * **Admins** can access and manage any task
-* **Admins can fetch all tasks for a specific user** via: `GET /tasks/user/:userId`
+* **Admins can fetch all tasks for a specific user** via: `GET /tasks/user/:id`
 
 Authorization logic is enforced in the **service layer**, not controllers.
 
@@ -111,8 +111,8 @@ This pattern keeps the codebase clean and scalable.
 | GET    | `/tasks`              | Get tasks for current user               | User          |
 | POST   | `/tasks`              | Create task                              | User          |
 | PATCH  | `/tasks/:id`          | Edit task                                | Owner / Admin |
-| GET    | `/tasks/:id`          | Admin: get all tasks for a specific user | Admin         |
-| GET    | `/tasks?id=`          | Get task by ID                           | Admin         |
+| GET    | `/tasks/user/:id`     | Admin: get all tasks for a specific user | Admin         |
+| GET    | `/tasks/:id`          | Get task by ID                           | Owner / Admin         |
 | POST   | `/tasks/:id`          | Create task for user                     | Admin         |
 
 > All routes require authentication
@@ -176,6 +176,7 @@ This project helped bridge the gap between **academic knowledge** and **industry
 * Add pagination & filtering
 * Add refresh tokens
 * Add database transactions
+* Add a logging system
 
 ---
 

@@ -25,7 +25,6 @@ function tokenAuthMiddleware(req: Request, res: Response, next: NextFunction) {
             throw new ApiError(401, "Invalid credentials");
         }
         req.user = { id: payload.id, role: payload.role };
-        console.log(req.user);
 
         next();
     } catch (err) {

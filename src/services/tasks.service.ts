@@ -27,10 +27,24 @@ export function getTasksForUser(id: string) {
     });
 }
 
-export function getTask(id: string) {
-    return tasks.find((t) => {
-        return t.id === id;
+export function getTask(options: {
+    id: string,
+    userID: string,
+    role: UserRole;
+}) {
+    let task = tasks.find((t) => {
+        return t.id === options.id;
     });
+
+    if (!task) {
+        throw new ApiError(404, "Task doesnt exist");
+    }
+
+    if (task.createdBy !== options.userID && options.role !== UserRole.ADMIN) {
+        throw new ApiError(401, "Unauthorized access");
+    }
+
+    return task;
 }
 
 export function updateTask(data: { id: string, userID: string, role: UserRole; }, update: { title?: string, description?: string, status?: TaskStatus; }) {

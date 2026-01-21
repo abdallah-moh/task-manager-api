@@ -70,7 +70,7 @@ async function registerUser(email: string, password: string, name: string) {
     let user = await createNewUser(email, password, name);
 
     if (!user) {
-        throw new ApiError(409, "Email already used");
+        throw new ApiError(409, "Invalid credentials");
     }
 
     let token = jwt.sign(

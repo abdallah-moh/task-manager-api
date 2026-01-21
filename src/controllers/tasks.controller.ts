@@ -1,16 +1,13 @@
 import type { Request, Response } from "express";
 import { createTask, deleteTask, getTask, getTasksForUser, updateTask } from "../services/tasks.service.js";
 import { TaskStatus } from "../types/tasks.types.js";
+import { ApiError } from "../utils/api-error.js";
 
 export function getTasksController(req: Request, res: Response) {
     let { id } = req.user;
 
     if (req.params.id) {
         id = req.params.id as string;
-    }
-
-    if (req.query.id) {
-        return res.json(getTask(req.query.id as string));
     }
 
     res.json(getTasksForUser(id));
@@ -31,6 +28,20 @@ export function createTaskController(req: Request, res: Response) {
 
     createTask({ title, description, assignedTo, createdBy, status });
     res.sendStatus(201);
+}
+
+export function getSingleTaskController(req: Request, res: Response) {
+    const task = getTask({
+        id: req.params.id as string,
+        userID: req.user.id,
+        role: req.user.role
+    });
+
+    if (!task) {
+        throw new ApiError(404, "Task not found");
+    }
+
+    res.json(task);
 }
 
 export function updateTaskController(req: Request, res: Response) {

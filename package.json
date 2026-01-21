@@ -10,7 +10,7 @@
     "type": "git",
     "url": "git+https://github.com/abdallah-moh/task-manager-api.git"
   },
-  "license": "ISC",
+  "license": "MIT",
   "author": "Abdallah <abdallah.moh.q@gmail.com>",
   "type": "module",
   "main": "dist/server.js",
