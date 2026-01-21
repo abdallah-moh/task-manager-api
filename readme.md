@@ -104,6 +104,15 @@ This pattern keeps the codebase clean and scalable.
 
 ## 🛣 API Routes
 
+### Users
+| Method | Endpoint              | Description                              | Access                                    |
+| ------ | --------------------- | ----------------------------------------  | -------------        |
+| GET    | `/users`              | Get all users (for Admin and normal Users for testing purposes) | User / Admin       |
+| POST   | `/users/login`        | Login to already existing User                                  | User               |
+| POST   | `/users/register`     | Register a new User                                             | Any                |
+| GET    | `/users/promote/:id`  | Promote a user to become an Admin                               | Admin              |
+> Promotion route requires authentication
+
 ### Tasks
 
 | Method | Endpoint              | Description                              | Access        |
@@ -112,7 +121,7 @@ This pattern keeps the codebase clean and scalable.
 | POST   | `/tasks`              | Create task                              | User          |
 | PATCH  | `/tasks/:id`          | Edit task                                | Owner / Admin |
 | GET    | `/tasks/user/:id`     | Admin: get all tasks for a specific user | Admin         |
-| GET    | `/tasks/:id`          | Get task by ID                           | Owner / Admin         |
+| GET    | `/tasks/:id`          | Get task by ID                           | Owner / Admin |
 | POST   | `/tasks/:id`          | Create task for user                     | Admin         |
 
 > All routes require authentication
@@ -191,4 +200,5 @@ Focused on Backend Engineering & Software Architecture
 ## 📄 License
 
 MIT License
+
 
