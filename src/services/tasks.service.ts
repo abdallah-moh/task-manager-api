@@ -73,6 +73,7 @@ export function updateTask(data: { id: string, userID: string, role: UserRole; }
     if (update.status) {
         task.status = update.status;
     }
+    task.updatedAt = new Date(Date.now());
 
     tasks[index] = task;
 }
