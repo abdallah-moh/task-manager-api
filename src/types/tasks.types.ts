@@ -4,13 +4,17 @@ export enum TaskStatus {
     DONE = "DONE"
 }
 
-export interface Task {
-    id: string,
+export interface CreateTask {
     title: string,
     description: string,
     status: TaskStatus,
-    createdBy: string,
-    assignedTo: string,
+    createdBy: number,
+    assignedTo: number;
+}
+export interface UpdateTask { title?: string, description?: string, status?: TaskStatus; }
+
+export interface Task extends CreateTask {
+    id: number,
     createdAt: Date,
     updatedAt: Date | null;
 }
