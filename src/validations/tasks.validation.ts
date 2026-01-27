@@ -12,7 +12,7 @@ const createTaskSchema = {
 
 const taskIdParamSchema = {
     params: Joi.object({
-        id: Joi.string().uuid().required(),
+        id: Joi.number().required(),
     }),
 };
 
@@ -28,6 +28,7 @@ export const updateTaskSchema = {
         description: Joi.string().max(200),
         status: Joi.string()
             .valid(...Object.values(TaskStatus)),
+        assignedTo: Joi.number()
     })
 };
 

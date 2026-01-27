@@ -17,7 +17,7 @@ const registerUserSchema = {
 
 const userIdParamSchema = {
     params: Joi.object({
-        id: Joi.string().uuid().required(),
+        id: Joi.number().required(),
     }),
 };
 
