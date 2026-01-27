@@ -3,7 +3,11 @@ import type { Request, Response, NextFunction } from "express";
 import { ApiError } from "../utils/api-error.js";
 import { UserRole } from "../types/users.types.js";
 import { UsersRepository } from "../repositories/users.repository.js";
-const AUTHORIZATION_TOKEN_SECRET = process.env.AUTHORIZATION_TOKEN_SECRET || "secret";
+const AUTHORIZATION_TOKEN_SECRET = process.env.AUTHORIZATION_TOKEN_SECRET as string;
+
+if (!AUTHORIZATION_TOKEN_SECRET) {
+    throw new Error("JWT secret not configured");
+}
 
 async function tokenAuthMiddleware(req: Request, res: Response, next: NextFunction) {
     try {

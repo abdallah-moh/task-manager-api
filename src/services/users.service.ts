@@ -5,7 +5,11 @@ import bcrypt from 'bcrypt';
 import { ApiError } from "../utils/api-error.js";
 
 const SALT_ROUNDS = 12;
-const AUTHORIZATION_TOKEN_SECRET = process.env.AUTHORIZATION_TOKEN_SECRET || "This is supposed to be secret";
+const AUTHORIZATION_TOKEN_SECRET = process.env.AUTHORIZATION_TOKEN_SECRET as string;
+
+if (!AUTHORIZATION_TOKEN_SECRET) {
+    throw new Error("JWT secret not configured");
+}
 
 export function getTokenForUser(id: number, role: UserRole) {
     return jwt.sign(
