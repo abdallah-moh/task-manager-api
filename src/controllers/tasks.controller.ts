@@ -1,66 +1,57 @@
 import type { Request, Response } from "express";
-import { createTask, deleteTask, getTask, getTasksForUser, updateTask } from "../services/tasks.service.js";
-import { TaskStatus } from "../types/tasks.types.js";
-import { ApiError } from "../utils/api-error.js";
+import { createTask, deleteTask, getTask, getTasksForAUser, updateTask } from "../services/tasks.service.js";
 
-export function getTasksController(req: Request, res: Response) {
-    let { id } = req.user;
 
-    if (req.params.id) {
-        id = req.params.id as string;
-    }
-
-    res.json(getTasksForUser(id));
-}
-
-export function createTaskController(req: Request, res: Response) {
+export async function createTaskController(req: Request, res: Response) {
     let { title, description, status } = req.body;
 
     let createdBy = req.user.id;
-    let assignedTo = req.params.id as string;
+    let assignedTo = parseInt(req.params.id as string);
 
-    if (!assignedTo) {
-        assignedTo = createdBy;
-    }
-    if (!status) {
-        status = TaskStatus.TODO;
-    }
-
-    createTask({ title, description, assignedTo, createdBy, status });
-    res.sendStatus(201);
+    let newTask = await createTask({ title, description, assignedTo, createdBy, status });
+    res.status(201).send(newTask);
 }
 
-export function getSingleTaskController(req: Request, res: Response) {
-    const task = getTask({
-        id: req.params.id as string,
-        userID: req.user.id,
+export async function getTaskController(req: Request, res: Response) {
+    const task = await getTask({
+        id: parseInt(req.params.id as string),
+        userId: req.user.id,
         role: req.user.role
     });
-
-    if (!task) {
-        throw new ApiError(404, "Task not found");
-    }
 
     res.json(task);
 }
 
-export function updateTaskController(req: Request, res: Response) {
-    const { title, description, status } = req.body;
-    const { role, id: userID } = req.user;
-    const { id } = req.params;
+export async function getTasksForUserController(req: Request, res: Response) {
+    let { id } = req.user;
 
-    updateTask({ id: id as string, userID, role }, { title, description, status });
+    if (req.params.userId) {
+        id = parseInt(req.params.userId as string);
+    }
 
-    res.sendStatus(200);
+    res.json(await getTasksForAUser(id));
 }
 
-export function deleteTaskController(req: Request, res: Response) {
+
+
+export async function updateTaskController(req: Request, res: Response) {
+    const { title, description, status, assignedTo } = req.body;
+    const { role, id: userId } = req.user;
     const { id } = req.params;
-    const { id: userID, role } = req.user;
+
+    let updatedTask = await updateTask({ id: parseInt(id as string), userId, role }, { title, description, status, assignedTo });
+
+    res.status(200).json(updatedTask);
+}
+
+export async function deleteTaskController(req: Request, res: Response) {
+    const { id } = req.params;
+    const { id: userId, role } = req.user;
 
 
-    deleteTask({
-        id: id as string, userID, role
+    await deleteTask({
+        id: parseInt(id as string), userId, role
     });
+
     res.sendStatus(200);
 }

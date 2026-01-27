@@ -108,8 +108,8 @@ This pattern keeps the codebase clean and scalable.
 | Method | Endpoint              | Description                              | Access                                    |
 | ------ | --------------------- | ----------------------------------------  | -------------        |
 | GET    | `/users`              | Get all users (for Admin and normal Users for testing purposes) | User / Admin       |
-| POST   | `/users/login`        | Login to already existing User                                  | User               |
-| POST   | `/users/register`     | Register a new User                                             | Any                |
+| POST   | `/users/signin`       | Login to already existing User                                  | User               |
+| POST   | `/users/signup`       | Register a new User                                             | Any                |
 | GET    | `/users/promote/:id`  | Promote a user to become an Admin                               | Admin              |
 > Promotion route requires authentication
 

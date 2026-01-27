@@ -1,98 +1,55 @@
-import { TaskStatus, type Task } from "../types/tasks.types.js";
+import { TaskRepository } from "../repositories/tasks.repository.js";
+import { TaskStatus, type CreateTask, type GetTask, type UpdateOrDeleteTaskInfo, type UpdateTask } from "../types/tasks.types.js";
 import { UserRole } from "../types/users.types.js";
 import { ApiError } from "../utils/api-error.js";
 
-let tasks: Task[] = [];
-
-export function createTask(data: { title: string, description: string, createdBy: string, assignedTo: string, status: TaskStatus; }) {
-    const { title, description, createdBy, assignedTo, status } = data;
-
-    let task: Task = {
-        id: crypto.randomUUID(),
-        title,
-        description,
-        createdBy,
-        assignedTo,
-        createdAt: new Date(Date.now()),
-        updatedAt: null,
-        status,
-    };
-
-    tasks.push(task);
-}
-
-export function getTasksForUser(id: string) {
-    return tasks.filter((task) => {
-        return task.assignedTo === id || task.createdBy === id;
-    });
-}
-
-export function getTask(options: {
-    id: string,
-    userID: string,
-    role: UserRole;
-}) {
-    let task = tasks.find((t) => {
-        return t.id === options.id;
-    });
-
-    if (!task) {
-        throw new ApiError(404, "Task doesnt exist");
+export async function createTask(task: CreateTask) {
+    // If the task is not assigned to anyone assign it to the creator
+    if (!task.assignedTo) {
+        task.assignedTo = task.createdBy;
     }
 
-    if (task.createdBy !== options.userID && options.role !== UserRole.ADMIN) {
-        throw new ApiError(401, "Unauthorized access");
+    // If task not specified assign default
+    if (!task.status) {
+        task.status = TaskStatus.TODO;
+    }
+
+    return await TaskRepository.createTask(task);
+}
+
+export async function getTask(taskInfo: GetTask) {
+    const { id, userId, role } = taskInfo;
+    const task = await TaskRepository.getTask(id);
+
+    if (!task) {
+        throw new ApiError(404, "Task not found");
+    }
+
+    const isOwnerOrAssignee =
+        userId === task.createdBy || userId === task.assignedTo;
+    // Check for permission
+    if (!isOwnerOrAssignee && role !== UserRole.ADMIN) {
+        throw new ApiError(403, "Forbidden access");
     }
 
     return task;
 }
 
-export function updateTask(data: { id: string, userID: string, role: UserRole; }, update: { title?: string, description?: string, status?: TaskStatus; }) {
-    let index = tasks.findIndex((t) => {
-        return t.id === data.id;
-    });
-
-    const task = tasks[index];
-
-    if (!task) {
-        throw new ApiError(404, "Task doesnt exist");
-    }
-
-    if (task.createdBy !== data.userID && data.role !== UserRole.ADMIN) {
-        throw new ApiError(401, "Unauthorized access");
-    }
-
-    if (update.title) {
-        task.title = update.title;
-    }
-
-    if (update.description) {
-        task.description = update.description;
-    }
-
-    if (update.status) {
-        task.status = update.status;
-    }
-    task.updatedAt = new Date(Date.now());
-
-    tasks[index] = task;
+export async function getTasksForAUser(id: number) {
+    return await TaskRepository.getTasksForUser(id);
 }
 
-export function deleteTask(options: {
-    id: string,
-    userID: string,
-    role: UserRole;
-}) {
-    let index = tasks.findIndex((t) => {
-        return t.id === options.id;
-    });
+export async function updateTask(updateInfo: UpdateOrDeleteTaskInfo, update: UpdateTask) {
+    // If a user can get a task and it does not throw an error then he can update the task
+    await getTask(updateInfo);
+    // Update the task
+    let updatedTask = await TaskRepository.updateTask(updateInfo.id, update);
+    return updatedTask;
+}
 
-    if (index < 0)
-        throw new ApiError(404, "Task doesn't exist");
-    let task = tasks[index];
-
-    if (task?.createdBy !== options.userID && options.role !== UserRole.ADMIN) {
-        throw new ApiError(401, "Unauthorized access");
-    }
-    tasks.splice(index, 1);
+export async function deleteTask(deleteInfo: UpdateOrDeleteTaskInfo) {
+    // If a user can get a task and it does not throw an error then he can delete the task
+    await getTask(deleteInfo);
+    // Update the task
+    await TaskRepository.deleteTask(deleteInfo.id);
 }

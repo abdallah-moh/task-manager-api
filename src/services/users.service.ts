@@ -1,102 +1,56 @@
-import { UserRole, type User } from "../types/users.types.js";
-import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import type { CreateUser, UpdateUser, User, UserRole } from "../types/users.types.js";
+import { UsersRepository } from "../repositories/users.repository.js";
+import bcrypt from 'bcrypt';
 import { ApiError } from "../utils/api-error.js";
 
-const AUTHORIZATION_TOKEN_SECRET = process.env.AUTHORIZATION_TOKEN_SECRET || "secret";
+const SALT_ROUNDS = 12;
+const AUTHORIZATION_TOKEN_SECRET = process.env.AUTHORIZATION_TOKEN_SECRET || "This is supposed to be secret";
 
-let users: User[] = [];
-
-function checkUserExists(key: 'id' | 'email', value: string) {
-    return getUser(key, value) != null;
-}
-
-function getUser(key: 'id' | 'email', value: string) {
-    return users.find((user) => {
-        return user[key] === value;
-    });
-}
-
-function getAllUsers() {
-    return users;
-}
-
-async function createNewUser(email: string, password: string, name: string) {
-    if (checkUserExists('email', email)) {
-        return null;
-    }
-
-    let user: User = {
-        id: crypto.randomUUID(),
-        name,
-        email,
-        password: await bcrypt.hash(password, 10),
-        createdAt: new Date(Date.now()),
-        role: users.length === 0 ? UserRole.ADMIN : UserRole.USER
-    };
-
-    users.push(user);
-    return user;
-}
-
-
-async function loginUser(email: string, password: string) {
-    let user = getUser("email", email);
-
-    if (!user) {
-        throw new ApiError(400, "Invalid email or password");
-    }
-
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) {
-        throw new ApiError(400, "Invalid email or password");
-    }
-
-    let token = jwt.sign(
+export function getTokenForUser(id: number, role: UserRole) {
+    return jwt.sign(
         {
-            id: user.id,
-            role: user.role
+            id: id,
+            role: role
         },
         AUTHORIZATION_TOKEN_SECRET,
         {
             expiresIn: "1h",
         }
     );
-
-    return { token };
 }
 
-async function registerUser(email: string, password: string, name: string) {
-    let user = await createNewUser(email, password, name);
+export async function createNewUser(user: CreateUser) {
+    user.password = await bcrypt.hash(user.password, SALT_ROUNDS);
 
-    if (!user) {
-        throw new ApiError(409, "Invalid credentials");
-    }
+    let { password, ...createdUser } = await UsersRepository.createUser(user) as User;
 
-    let token = jwt.sign(
-        {
-            id: user.id,
-            role: user.role
-        },
-        AUTHORIZATION_TOKEN_SECRET,
-        {
-            expiresIn: "1h",
-        }
-    );
-    return { token };
+    return createdUser;
 }
 
-function promoteAUser(key: 'id' | 'email', value: string) {
-    let user = getUser(key, value);
+export async function signUpUser(user: CreateUser) {
+    const createdUser = await createNewUser(user);
+    const token = getTokenForUser(createdUser.id, createdUser.role);
 
-    if (!user) {
-        throw new ApiError(404, "A user with this ID doesn't exist");
-    }
-
-    let index = users.indexOf(user);
-    if (index !== -1) {
-        users[index] = { ...users[index], role: UserRole.ADMIN } as User;
-    }
+    return { createdUser, token };
 }
 
-export { checkUserExists, createNewUser, getUser, getAllUsers, promoteAUser, loginUser, registerUser };
+export async function signInUser(credentials: { email: string, password: string; }) {
+    const user = await UsersRepository.getUser("email", credentials.email);
+
+    if (!user)
+        throw new ApiError(401, "Invalid email or password");
+
+    if (!await bcrypt.compare(credentials.password, user.password))
+        throw new ApiError(401, "Invalid email or password");
+
+    const token = getTokenForUser(user.id, user.role);
+
+    return { user, token };
+}
+
+export async function updateUser(id: number, update: UpdateUser) {
+    const updatedUser = await UsersRepository.updateUser(id, update);
+
+    return updatedUser;
+}
