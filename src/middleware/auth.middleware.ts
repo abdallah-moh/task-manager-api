@@ -29,7 +29,7 @@ async function tokenAuthMiddleware(req: Request, res: Response, next: NextFuncti
         if (!user) {
             throw new ApiError(401, "Unauthorized access");
         }
-        req.user = { id: payload.id, role: payload.role };
+        req.user = { id: payload.id, role: user.role };
 
         next();
     } catch (err) {
