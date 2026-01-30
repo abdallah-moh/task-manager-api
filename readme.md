@@ -158,7 +158,56 @@ src/
 
 ---
 
-## ⚡ Getting Started
+
+## 🐳 Running the Project with Docker
+
+### Create a `.env` file:
+
+```env
+AUTHORIZATION_TOKEN_SECRET=your_secret_key
+DB_USER=user
+DB_PASSWORD=password
+DB_NAME=name
+PORT=3000
+```
+
+### Development
+
+```bash
+docker compose -f docker-compose-dev.yaml up --build
+```
+
+Stop:
+
+```bash
+docker compose -f docker-compose-dev.yaml down
+```
+
+---
+
+### Production
+
+```bash
+docker compose -f docker-compose-prod.yaml up --build -d
+```
+
+Stop:
+
+```bash
+docker compose -f docker-compose-prod.yaml down
+```
+
+---
+
+### Reset Database (⚠️ removes all data)
+
+```bash
+docker compose -f docker-compose-dev.yaml down -v
+```
+
+---
+
+## ⚡ Getting Started with Node
 
 ### Install dependencies
 
@@ -171,9 +220,11 @@ npm install
 Create a `.env` file:
 
 ```env
+AUTHORIZATION_TOKEN_SECRET=your_secret_key
+DB_USER=user
+DB_PASSWORD=password
+DB_NAME=name
 PORT=3000
-DATABASE_URL=postgresql://user:password@localhost:5432/task_manager
-JWT_SECRET=your_secret_key
 ```
 
 ### Run the server
@@ -183,8 +234,6 @@ npm run dev
 ```
 
 Server will start at: `http://localhost:3000`
-
----
 
 ## 🧠 What I Learned
 
@@ -197,6 +246,10 @@ Server will start at: `http://localhost:3000`
 * Validating requests before hitting services or DB
 * Using **TypeScript** to enforce type safety
 * Designing endpoints with **clear ownership and access rules**
+* **Containerizing applications** with **Docker**
+* Using **Docker Compose** to orchestrate multi-container applications (API + PostgreSQL)
+* Enabling **hot-reloading** in containers with `tsx watch`
+* Debugging and interacting with running containers via `docker exec`
 
 ---
 
