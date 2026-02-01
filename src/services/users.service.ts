@@ -11,7 +11,7 @@ if (!AUTHORIZATION_TOKEN_SECRET) {
     throw new Error("JWT secret not configured");
 }
 
-export function getTokenForUser(id: number, role: UserRole) {
+export function getTokenForUser(id: number) {
     return jwt.sign(
         {
             sub: id
@@ -33,7 +33,7 @@ export async function createNewUser(user: CreateUser) {
 
 export async function signUpUser(user: CreateUser) {
     const createdUser = await createNewUser(user);
-    const token = getTokenForUser(createdUser.id, createdUser.role);
+    const token = getTokenForUser(createdUser.id);
 
     return { createdUser, token };
 }
@@ -47,7 +47,7 @@ export async function signInUser(credentials: { email: string, password: string;
     if (!await bcrypt.compare(credentials.password, user.password))
         throw new ApiError(401, "Invalid email or password");
 
-    const token = getTokenForUser(user.id, user.role);
+    const token = getTokenForUser(user.id);
 
     return { user, token };
 }
