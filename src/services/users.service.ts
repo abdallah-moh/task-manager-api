@@ -14,8 +14,7 @@ if (!AUTHORIZATION_TOKEN_SECRET) {
 export function getTokenForUser(id: number, role: UserRole) {
     return jwt.sign(
         {
-            id: id,
-            role: role
+            sub: id
         },
         AUTHORIZATION_TOKEN_SECRET,
         {

@@ -23,13 +23,14 @@ async function tokenAuthMiddleware(req: Request, res: Response, next: NextFuncti
         }
 
         let payload = jwt.verify(accessToken, AUTHORIZATION_TOKEN_SECRET) as JwtPayload;
+        let id = parseInt(payload.sub as string);
 
-        const user = await UsersRepository.getUser("id", payload.id);
+        const user = await UsersRepository.getUser("id", id);
 
         if (!user) {
             throw new ApiError(401, "Unauthorized access");
         }
-        req.user = { id: payload.id, role: user.role };
+        req.user = { id, role: user.role };
 
         next();
     } catch (err) {
