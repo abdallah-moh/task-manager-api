@@ -1,5 +1,6 @@
 import type { Request, Response } from "express";
 import { createTask, deleteTask, getTask, getTasksForAUser, updateTask } from "../services/tasks.service.js";
+import type { TaskStatus } from "../types/tasks.types.js";
 
 
 export async function createTaskController(req: Request, res: Response) {
@@ -22,14 +23,42 @@ export async function getTaskController(req: Request, res: Response) {
     res.json(task);
 }
 
-export async function getTasksForUserController(req: Request, res: Response) {
-    let { id } = req.user;
+export async function getTasksController(req: Request, res: Response) {
+    let userId = req.user.id;
+
+    const {
+        search,
+        status,
+        created_before,
+        created_after,
+        updated_after,
+        updated_before,
+        cursor,
+        limit
+    } = req.query;
 
     if (req.params.userId) {
-        id = parseInt(req.params.userId as string);
+        userId = parseInt(req.params.userId as string);
     }
 
-    res.json(await getTasksForAUser(id));
+    res.json(await getTasksForAUser(userId, {
+        search: search as string,
+        status: status as TaskStatus,
+        cursor: parseInt(cursor as string) || 0,
+        limit: parseInt(limit as string) || 10,
+        ...(created_before !== undefined
+            ? { created_before: new Date(created_before as string) }
+            : {}),
+        ...(created_after !== undefined
+            ? { created_after: new Date(created_after as string) }
+            : {}),
+        ...(updated_before !== undefined
+            ? { updated_before: new Date(updated_before as string) }
+            : {}),
+        ...(updated_after !== undefined
+            ? { updated_after: new Date(updated_after as string) }
+            : {}),
+    }));
 }
 
 

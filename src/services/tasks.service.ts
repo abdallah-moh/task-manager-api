@@ -1,5 +1,5 @@
 import { TaskRepository } from "../repositories/tasks.repository.js";
-import { TaskStatus, type CreateTask, type GetTask, type UpdateOrDeleteTaskInfo, type UpdateTask } from "../types/tasks.types.js";
+import { TaskStatus, type CreateTask, type GetTask, type TasksFilters, type UpdateOrDeleteTaskInfo, type UpdateTask } from "../types/tasks.types.js";
 import { UserRole } from "../types/users.types.js";
 import { ApiError } from "../utils/api-error.js";
 
@@ -27,6 +27,7 @@ export async function getTask(taskInfo: GetTask) {
 
     const isOwnerOrAssignee =
         userId === task.createdBy || userId === task.assignedTo;
+
     // Check for permission
     if (!isOwnerOrAssignee && role !== UserRole.ADMIN) {
         throw new ApiError(403, "Forbidden access");
@@ -35,8 +36,8 @@ export async function getTask(taskInfo: GetTask) {
     return task;
 }
 
-export async function getTasksForAUser(id: number) {
-    return await TaskRepository.getTasksForUser(id);
+export async function getTasksForAUser(id: number, filters: TasksFilters) {
+    return await TaskRepository.getTasksForUser(id, filters);
 }
 
 export async function updateTask(updateInfo: UpdateOrDeleteTaskInfo, update: UpdateTask) {
