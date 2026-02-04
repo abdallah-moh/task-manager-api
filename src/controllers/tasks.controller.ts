@@ -45,7 +45,7 @@ export async function getTasksController(req: Request, res: Response) {
         search: search as string,
         status: status as TaskStatus,
         cursor: parseInt(cursor as string) || 0,
-        limit: parseInt(limit as string) || 10,
+        limit: Math.min(Number(limit) || 10, 50),
         ...(created_before !== undefined
             ? { created_before: new Date(created_before as string) }
             : {}),
