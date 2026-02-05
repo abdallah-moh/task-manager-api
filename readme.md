@@ -134,14 +134,14 @@ src/
 
 ### Tasks
 
-| Method | Endpoint          | Description                         | Access        |
+| Method | Endpoint          | Description                        | Access        |
 | ------ | ---------------- | ----------------------------------- | ------------- |
 | GET    | `/tasks`         | Get tasks for current user          | User         |
 | POST   | `/tasks`         | Create task                         | User         |
-| PATCH  | `/tasks/:id`     | Edit task                           | Owner/Admin  |
+| PATCH  | `/tasks/:taskId`     | Edit task                           | Owner/Admin  |
 | GET    | `/tasks/user/:userId`| Admin: get all tasks for a user | Admin        |
-| GET    | `/tasks/:id`     | Get task by ID                      | Owner/Admin  |
-| POST   | `/tasks/:id`     | Admin: create task for a user       | Admin        |
+| GET    | `/tasks/:taskId`     | Get task by ID                      | Owner/Admin  |
+| POST   | `/tasks/user/:userId`     | Admin: create task for a user   | Admin        |
 
 ```sh
 For getting tasks (GET /tasks or GET /tasks/user/:userId) they have the query options: 
