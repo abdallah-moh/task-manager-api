@@ -23,6 +23,7 @@ This project demonstrates **real backend engineering practices**: layered archit
 - Request validation with **Joi**
 - Clean separation of concerns (Routes → Controllers → Services)
 - Fully type-safe Express setup with **TypeScript**
+- Pagination and filtering of tasks
 
 ---
 
@@ -267,7 +268,6 @@ Server will start at: `http://localhost:3000`
 ## ⚡ Possible Improvements
 
 * Automated tests (unit & integration)
-* Pagination and filtering
 * Refresh tokens
 * Structured logging and monitoring
 
