@@ -7,5 +7,6 @@ declare module "express-serve-static-core" {
             id: number;
             role: UserRole;
         };
+        validatedQuery: Query;
     }
 }

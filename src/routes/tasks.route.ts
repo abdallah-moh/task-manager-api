@@ -9,23 +9,21 @@ const router = Router();
 
 router.use(tokenAuthMiddleware);
 
+// Router for Admins
+
+router.get("/user/:userId", adminAuthMiddleware, validateMiddleware({ ...taskIdParamSchema, ...filteringAndPagination }), catchAsync(getTasksController));
+router.post("/user/:userId", adminAuthMiddleware, validateMiddleware(createTaskAsAdminSchema), catchAsync(createTaskController));
+
 // Router for Users
 
 // GET
 router.get("/", validateMiddleware(filteringAndPagination), catchAsync(getTasksController));
-router.get("/:id", catchAsync(getTaskController));
+router.get("/:taskId", catchAsync(getTaskController));
 
 // POST/PATCH/DELETE
 router.post("/", validateMiddleware(createTaskSchema), catchAsync(createTaskController));
-router.patch("/:id", validateMiddleware(updateTaskSchema), catchAsync(updateTaskController));
-router.delete("/:id", validateMiddleware(taskIdParamSchema), deleteTaskController);
-
-// Router for Admins
-router.use(adminAuthMiddleware);
-
-router.get("/user/:userId", validateMiddleware({ ...taskIdParamSchema, ...filteringAndPagination }), catchAsync(getTasksController));
-router.post("/:id", validateMiddleware(createTaskAsAdminSchema), catchAsync(createTaskController));
-router.delete("/:id", validateMiddleware(taskIdParamSchema), catchAsync(deleteTaskController));
+router.patch("/:taskId", validateMiddleware(updateTaskSchema), catchAsync(updateTaskController));
+router.delete("/:taskId", validateMiddleware(taskIdParamSchema), deleteTaskController);
 
 
 

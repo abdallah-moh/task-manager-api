@@ -7,7 +7,7 @@ export async function createTaskController(req: Request, res: Response) {
     let { title, description, status } = req.body;
 
     let createdBy = req.user.id;
-    let assignedTo = parseInt(req.params.id as string);
+    let assignedTo = parseInt(req.params.userId as string);
 
     let newTask = await createTask({ title, description, assignedTo, createdBy, status });
     res.status(201).send(newTask);
@@ -15,7 +15,7 @@ export async function createTaskController(req: Request, res: Response) {
 
 export async function getTaskController(req: Request, res: Response) {
     const task = await getTask({
-        id: parseInt(req.params.id as string),
+        id: parseInt(req.params.taskId as string),
         userId: req.user.id,
         role: req.user.role
     });
@@ -35,7 +35,7 @@ export async function getTasksController(req: Request, res: Response) {
         updated_before,
         cursor,
         limit
-    } = req.query;
+    } = req.validatedQuery;
 
     if (req.params.userId) {
         userId = parseInt(req.params.userId as string);
@@ -66,20 +66,20 @@ export async function getTasksController(req: Request, res: Response) {
 export async function updateTaskController(req: Request, res: Response) {
     const { title, description, status, assignedTo } = req.body;
     const { role, id: userId } = req.user;
-    const { id } = req.params;
+    const { taskId } = req.params;
 
-    let updatedTask = await updateTask({ id: parseInt(id as string), userId, role }, { title, description, status, assignedTo });
+    let updatedTask = await updateTask({ id: parseInt(taskId as string), userId, role }, { title, description, status, assignedTo });
 
     res.status(200).json(updatedTask);
 }
 
 export async function deleteTaskController(req: Request, res: Response) {
-    const { id } = req.params;
+    const { taskId } = req.params;
     const { id: userId, role } = req.user;
 
 
     await deleteTask({
-        id: parseInt(id as string), userId, role
+        id: parseInt(taskId as string), userId, role
     });
 
     res.sendStatus(200);
