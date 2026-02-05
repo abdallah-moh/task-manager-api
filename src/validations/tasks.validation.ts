@@ -32,4 +32,19 @@ export const updateTaskSchema = {
     })
 };
 
+export const filteringAndPagination = {
+    query: Joi.object({
+        search: Joi.string(),
+        status: Joi.string()
+            .valid(...Object.values(TaskStatus)),
+        created_before: Joi.date(),
+        created_after: Joi.date(),
+        updated_after: Joi.date(),
+        updated_before: Joi.date(),
+        cursor: Joi.number(),
+        limit: Joi.number()
+
+    })
+};
+
 export { createTaskSchema, taskIdParamSchema };

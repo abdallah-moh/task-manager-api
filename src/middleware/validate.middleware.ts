@@ -39,7 +39,7 @@ export function validateMiddleware(schema: ValidationSchema) {
                 throw error;
             }
 
-            req.query = value;
+            // req.query = value;
         }
 
         next();

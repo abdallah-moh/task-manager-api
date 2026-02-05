@@ -25,3 +25,14 @@ export interface Task extends CreateTask {
     createdAt: Date,
     updatedAt: Date | null;
 }
+
+export interface TasksFilters {
+    search?: string,
+    status?: TaskStatus,
+    created_before?: Date,
+    created_after?: Date,
+    updated_after?: Date,
+    updated_before?: Date,
+    cursor?: number,
+    limit?: number;
+}

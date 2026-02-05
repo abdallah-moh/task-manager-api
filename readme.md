@@ -3,7 +3,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
 [![Node.js](https://img.shields.io/badge/Node.js-v18-blue)]()
 [![TypeScript](https://img.shields.io/badge/TypeScript-v5-blue)]()
-[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-v15-blue)]()
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-v18-blue)]()
 
 A **Task Management REST API** built with **Node.js, Express, TypeScript, and PostgreSQL**.  
 
@@ -143,6 +143,17 @@ src/
 | GET    | `/tasks/:id`     | Get task by ID                      | Owner/Admin  |
 | POST   | `/tasks/:id`     | Admin: create task for a user       | Admin        |
 
+```sh
+For getting tasks (GET /tasks or GET /tasks/user/:userId) they have the query options: 
+    - search: Search title and description for specific text,
+    - status:Tasks matching (TODO | IN_PROGRESS | DONE),
+    - created_before: Tasks created before this date,
+    - created_after: Tasks created after this date,
+    - updated_after: Tasks updated after this date,
+    - updated_before: Tasks updated before this date,
+    - cursor: default 0
+    - limit: default 10 max 50
+```
 > All task routes require authentication
 
 ---
