@@ -245,7 +245,7 @@ PORT=3000
 npm run dev
 ```
 
-Server will start at: `http://localhost:3000`
+Server will start at: `http://localhost:3000/api/v1`
 
 ## 🧠 What I Learned
 
@@ -282,5 +282,6 @@ Focused on Backend Engineering & Software Architecture
 ---
 
 ## 📄 License
+
 
 MIT License
