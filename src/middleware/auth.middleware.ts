@@ -1,13 +1,8 @@
-import jwt, { type JwtPayload } from "jsonwebtoken";
 import type { Request, Response, NextFunction } from "express";
 import { ApiError } from "../utils/api-error.js";
 import { UserRole } from "../types/users.types.js";
 import { UsersRepository } from "../repositories/users.repository.js";
-const AUTHORIZATION_TOKEN_SECRET = process.env.AUTHORIZATION_TOKEN_SECRET as string;
-
-if (!AUTHORIZATION_TOKEN_SECRET) {
-    throw new Error("JWT secret not configured");
-}
+import { verifyToken } from "../utils/jwt-tokens.js";
 
 async function tokenAuthMiddleware(req: Request, res: Response, next: NextFunction) {
     try {
@@ -22,7 +17,7 @@ async function tokenAuthMiddleware(req: Request, res: Response, next: NextFuncti
             throw new ApiError(401, "Authentication required");
         }
 
-        let payload = jwt.verify(accessToken, AUTHORIZATION_TOKEN_SECRET) as JwtPayload;
+        let payload = verifyToken(accessToken, 'access');
         let id = parseInt(payload.sub as string);
 
         const user = await UsersRepository.getUser("id", id);

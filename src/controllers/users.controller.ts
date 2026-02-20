@@ -10,19 +10,21 @@ export async function signUpController(req: Request, res: Response) {
     // Make the first ever user and ADMIN
     const role = (await UsersRepository.getAllUsers()).length === 0 ? UserRole.ADMIN : UserRole.USER;
 
-    const { token } = await signUpUser({ email, password, name, role });
+    const { accessToken, refreshToken } = await signUpUser({ email, password, name, role });
 
     res.json({
-        accessToken: token
+        accessToken,
+        refreshToken
     });
 }
 
 export async function signInController(req: Request, res: Response) {
     let { email, password } = req.body as { email: string, password: string; };
-    const { token } = await signInUser({ email, password });
+    const { accessToken, refreshToken } = await signInUser({ email, password });
 
     res.json({
-        accessToken: token
+        accessToken,
+        refreshToken
     });
 
 }

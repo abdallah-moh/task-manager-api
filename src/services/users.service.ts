@@ -1,27 +1,10 @@
-import jwt from "jsonwebtoken";
 import type { CreateUser, UpdateUser, User, UserRole } from "../types/users.types.js";
 import { UsersRepository } from "../repositories/users.repository.js";
 import bcrypt from 'bcrypt';
 import { ApiError } from "../utils/api-error.js";
+import { createTokensForUser } from "../utils/jwt-tokens.js";
 
 const SALT_ROUNDS = 12;
-const AUTHORIZATION_TOKEN_SECRET = process.env.AUTHORIZATION_TOKEN_SECRET as string;
-
-if (!AUTHORIZATION_TOKEN_SECRET) {
-    throw new Error("JWT secret not configured");
-}
-
-export function getTokenForUser(id: number) {
-    return jwt.sign(
-        {
-            sub: id
-        },
-        AUTHORIZATION_TOKEN_SECRET,
-        {
-            expiresIn: "1h",
-        }
-    );
-}
 
 export async function createNewUser(user: CreateUser) {
     user.password = await bcrypt.hash(user.password, SALT_ROUNDS);
@@ -33,9 +16,9 @@ export async function createNewUser(user: CreateUser) {
 
 export async function signUpUser(user: CreateUser) {
     const createdUser = await createNewUser(user);
-    const token = getTokenForUser(createdUser.id);
+    const tokens = createTokensForUser(createdUser.id);
 
-    return { createdUser, token };
+    return { createdUser, ...tokens };
 }
 
 export async function signInUser(credentials: { email: string, password: string; }) {
@@ -47,9 +30,9 @@ export async function signInUser(credentials: { email: string, password: string;
     if (!await bcrypt.compare(credentials.password, user.password))
         throw new ApiError(401, "Invalid email or password");
 
-    const token = getTokenForUser(user.id);
+    const tokens = createTokensForUser(user.id);
 
-    return { user, token };
+    return { user, ...tokens };
 }
 
 export async function updateUser(id: number, update: UpdateUser) {
