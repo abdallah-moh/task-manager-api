@@ -91,6 +91,7 @@ src/
 
 - JWT-based, token required for all task routes
 - Tokens signed using a server-side secret
+- Refresh tokens
 
 **Authorization:**
 
@@ -129,6 +130,7 @@ src/
 | GET    | `/users`            | Get all users (for testing)       | User / Admin |
 | POST   | `/users/signin`     | Login an existing user           | Any          |
 | POST   | `/users/signup`     | Register a new user              | Any          |
+| POST   | `/users/signout`    | Sign out a user                  | User / Admin |
 | GET    | `/users/promote/:id`| Promote a user to Admin          | Admin        |
 
 > Promotion route requires authentication
@@ -265,12 +267,18 @@ Server will start at: `http://localhost:3000`
 
 ---
 
-## ⚡ Possible Improvements
+## 🚀 Possible Improvements
+* Unit tests (service layer)
+* Integration tests (API routes)
+* Structured logging (e.g., Winston / Pino)
+* Rate limiting
+* CI pipeline
 
-* Automated tests (unit & integration)
-* Refresh tokens
-* Structured logging and monitoring
-
+## 🔮 Future Features
+* Store refresh tokens with device metadata
+* Revoke tokens per device
+* Team-based task management
+* Task deadlines
 ---
 
 ## 👤 Author
