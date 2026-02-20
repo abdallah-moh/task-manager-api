@@ -21,8 +21,15 @@ const userIdParamSchema = {
     }),
 };
 
+const refreshTokenSchema = {
+    body: Joi.object({
+        refresh_token: Joi.string().required()
+    })
+};
+
 export {
     loginUserSchema,
     registerUserSchema,
-    userIdParamSchema
+    userIdParamSchema,
+    refreshTokenSchema
 };

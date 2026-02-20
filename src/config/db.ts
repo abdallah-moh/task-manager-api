@@ -32,6 +32,13 @@ export async function initDB() {
         updated_at TIMESTAMP
       );
     `);
+
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS tokens (
+        id SERIAL PRIMARY KEY,
+        refresh_token TEXT NOT NULL
+      );
+    `);
     console.log('✅ Tables checked/created successfully');
   } catch (err) {
     console.log(err);

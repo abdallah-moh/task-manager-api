@@ -1,41 +1,52 @@
-import jwt, { type JwtPayload } from "jsonwebtoken";
 import type { Request, Response, NextFunction } from "express";
 import { ApiError } from "../utils/api-error.js";
 import { UserRole } from "../types/users.types.js";
 import { UsersRepository } from "../repositories/users.repository.js";
-const AUTHORIZATION_TOKEN_SECRET = process.env.AUTHORIZATION_TOKEN_SECRET as string;
+import { verifyToken } from "../utils/jwt-tokens.js";
+import { TokensRepository } from "../repositories/tokens.repository.js";
 
-if (!AUTHORIZATION_TOKEN_SECRET) {
-    throw new Error("JWT secret not configured");
-}
+function tokenAuthMiddleware(type: 'access' | 'refresh') {
+    return async (req: Request, res: Response, next: NextFunction) => {
+        let token;
+        try {
+            if (type === 'refresh') {
+                token = req.body.refresh_token;
+                const result = await TokensRepository.getToken(token);
 
-async function tokenAuthMiddleware(req: Request, res: Response, next: NextFunction) {
-    try {
-        let { authorization } = req.headers;
-        let accessToken;
+                if (!result) {
+                    throw new ApiError(401, "Unauthorized");
+                }
+            }
+            else if (type === 'access') {
+                let { authorization } = req.headers;
 
-        if (authorization?.startsWith("Bearer ")) {
-            accessToken = authorization.split(" ")[1];
+                if (authorization?.startsWith("Bearer ")) {
+                    token = authorization.split(" ")[1];
+                }
+            }
+
+            if (!token) {
+                throw new ApiError(401, "Authentication required");
+            }
+
+            let payload = verifyToken(token, type);
+            let id = parseInt(payload.sub as string);
+
+            const user = await UsersRepository.getUser("id", id);
+
+            if (!user) {
+                throw new ApiError(401, "Unauthorized access");
+            }
+            req.user = { id, role: user.role };
+
+            next();
+        } catch (err) {
+            if ((err as Error).name === 'TokenExpiredError' && type === 'refresh') {
+                await TokensRepository.deleteToken(token);
+            }
+            next(err);
         }
-
-        if (!accessToken) {
-            throw new ApiError(401, "Authentication required");
-        }
-
-        let payload = jwt.verify(accessToken, AUTHORIZATION_TOKEN_SECRET) as JwtPayload;
-        let id = parseInt(payload.sub as string);
-
-        const user = await UsersRepository.getUser("id", id);
-
-        if (!user) {
-            throw new ApiError(401, "Unauthorized access");
-        }
-        req.user = { id, role: user.role };
-
-        next();
-    } catch (err) {
-        next(err);
-    }
+    };
 };
 
 function adminAuthMiddleware(req: Request, res: Response, next: NextFunction) {
