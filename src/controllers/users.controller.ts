@@ -1,8 +1,7 @@
 import type { Request, Response } from "express";
-import { signUpUser, signInUser, updateUser } from "../services/users.service.js";
+import { signUpUser, signInUser, updateUser, refreshUser, signOutUser } from "../services/users.service.js";
 import { UserRole, type CreateUser } from "../types/users.types.js";
 import { UsersRepository } from "../repositories/users.repository.js";
-import { createTokensForUser, verifyToken } from "../utils/jwt-tokens.js";
 
 
 export async function signUpController(req: Request, res: Response) {
@@ -30,12 +29,18 @@ export async function signInController(req: Request, res: Response) {
 
 }
 
+export async function signOutController(req: Request, res: Response) {
+    const { refreshToken } = req.body;
+    signOutUser(refreshToken);
+
+    res.sendStatus(204);
+
+}
+
 export async function refreshController(req: Request, res: Response) {
     const { refresh_token } = req.body;
 
-    const payload = verifyToken(refresh_token, 'refresh');
-
-    const { accessToken } = createTokensForUser(parseInt(payload.sub as string));
+    const { accessToken } = refreshUser(refresh_token);
 
     res.json({
         accessToken

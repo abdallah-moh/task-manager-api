@@ -3,14 +3,19 @@ import { ApiError } from "../utils/api-error.js";
 import { UserRole } from "../types/users.types.js";
 import { UsersRepository } from "../repositories/users.repository.js";
 import { verifyToken } from "../utils/jwt-tokens.js";
+import { TokensRepository } from "../repositories/tokens.repository.js";
 
 function tokenAuthMiddleware(type: 'access' | 'refresh') {
     return async (req: Request, res: Response, next: NextFunction) => {
+        let token;
         try {
-            let token;
-
             if (type === 'refresh') {
                 token = req.body.refresh_token;
+                const result = await TokensRepository.getToken(token);
+
+                if (!result) {
+                    throw new ApiError(401, "Unauthorized");
+                }
             }
             else if (type === 'access') {
                 let { authorization } = req.headers;
@@ -36,6 +41,9 @@ function tokenAuthMiddleware(type: 'access' | 'refresh') {
 
             next();
         } catch (err) {
+            if ((err as Error).name === 'TokenExpiredError' && type === 'refresh') {
+                await TokensRepository.deleteToken(token);
+            }
             next(err);
         }
     };

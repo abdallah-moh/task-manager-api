@@ -2,9 +2,10 @@ import type { CreateUser, UpdateUser, User, UserRole } from "../types/users.type
 import { UsersRepository } from "../repositories/users.repository.js";
 import bcrypt from 'bcrypt';
 import { ApiError } from "../utils/api-error.js";
-import { createTokensForUser } from "../utils/jwt-tokens.js";
+import { createTokensForUser, verifyToken } from "../utils/jwt-tokens.js";
+import { TokensRepository } from "../repositories/tokens.repository.js";
 
-const SALT_ROUNDS = 12;
+export const SALT_ROUNDS = 12;
 
 export async function createNewUser(user: CreateUser) {
     user.password = await bcrypt.hash(user.password, SALT_ROUNDS);
@@ -17,6 +18,8 @@ export async function createNewUser(user: CreateUser) {
 export async function signUpUser(user: CreateUser) {
     const createdUser = await createNewUser(user);
     const tokens = createTokensForUser(createdUser.id);
+
+    TokensRepository.addToken(tokens.refreshToken);
 
     return { createdUser, ...tokens };
 }
@@ -32,7 +35,19 @@ export async function signInUser(credentials: { email: string, password: string;
 
     const tokens = createTokensForUser(user.id);
 
+    TokensRepository.addToken(tokens.refreshToken);
+
     return { user, ...tokens };
+}
+
+export async function signOutUser(refreshToken: string) {
+    TokensRepository.deleteToken(refreshToken);
+}
+
+export function refreshUser(refresh_token: string) {
+    const payload = verifyToken(refresh_token, 'refresh');
+
+    return createTokensForUser(parseInt(payload.sub as string));
 }
 
 export async function updateUser(id: number, update: UpdateUser) {
