@@ -4,33 +4,41 @@ import { UserRole } from "../types/users.types.js";
 import { UsersRepository } from "../repositories/users.repository.js";
 import { verifyToken } from "../utils/jwt-tokens.js";
 
-async function tokenAuthMiddleware(req: Request, res: Response, next: NextFunction) {
-    try {
-        let { authorization } = req.headers;
-        let accessToken;
+function tokenAuthMiddleware(type: 'access' | 'refresh') {
+    return async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            let token;
 
-        if (authorization?.startsWith("Bearer ")) {
-            accessToken = authorization.split(" ")[1];
+            if (type === 'refresh') {
+                token = req.body.refresh_token;
+            }
+            else if (type === 'access') {
+                let { authorization } = req.headers;
+
+                if (authorization?.startsWith("Bearer ")) {
+                    token = authorization.split(" ")[1];
+                }
+            }
+
+            if (!token) {
+                throw new ApiError(401, "Authentication required");
+            }
+
+            let payload = verifyToken(token, type);
+            let id = parseInt(payload.sub as string);
+
+            const user = await UsersRepository.getUser("id", id);
+
+            if (!user) {
+                throw new ApiError(401, "Unauthorized access");
+            }
+            req.user = { id, role: user.role };
+
+            next();
+        } catch (err) {
+            next(err);
         }
-
-        if (!accessToken) {
-            throw new ApiError(401, "Authentication required");
-        }
-
-        let payload = verifyToken(accessToken, 'access');
-        let id = parseInt(payload.sub as string);
-
-        const user = await UsersRepository.getUser("id", id);
-
-        if (!user) {
-            throw new ApiError(401, "Unauthorized access");
-        }
-        req.user = { id, role: user.role };
-
-        next();
-    } catch (err) {
-        next(err);
-    }
+    };
 };
 
 function adminAuthMiddleware(req: Request, res: Response, next: NextFunction) {

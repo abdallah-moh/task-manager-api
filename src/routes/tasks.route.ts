@@ -7,7 +7,7 @@ import { catchAsync } from "../utils/catch-async.js";
 
 const router = Router();
 
-router.use(tokenAuthMiddleware);
+router.use(tokenAuthMiddleware('access'));
 
 // Router for Admins
 
